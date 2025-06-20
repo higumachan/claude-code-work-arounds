@@ -3,7 +3,7 @@ use std::path::Path;
 use std::time::SystemTime;
 use filetime::{set_file_mtime, FileTime};
 
-use super::{FileMetadata, FileSystem, Result};
+use super::{EntryMetadata, FileSystem, Result};
 
 #[derive(Debug, Clone)]
 pub struct RealFileSystem;
@@ -15,7 +15,7 @@ impl RealFileSystem {
 }
 
 impl FileSystem for RealFileSystem {
-    fn list_directory(&self, path: &Path) -> Result<Vec<FileMetadata>> {
+    fn list_directory(&self, path: &Path) -> Result<Vec<EntryMetadata>> {
         let mut results = Vec::new();
         
         let entries = match fs::read_dir(path) {
@@ -40,7 +40,7 @@ impl FileSystem for RealFileSystem {
                 Err(_) => SystemTime::now(), // Use current time as fallback
             };
             
-            results.push(FileMetadata {
+            results.push(EntryMetadata {
                 path,
                 modified,
                 is_directory: metadata.is_dir(),
@@ -50,10 +50,10 @@ impl FileSystem for RealFileSystem {
         Ok(results)
     }
     
-    fn get_metadata(&self, path: &Path) -> Result<FileMetadata> {
+    fn get_metadata(&self, path: &Path) -> Result<EntryMetadata> {
         let metadata = fs::metadata(path)?;
         
-        Ok(FileMetadata {
+        Ok(EntryMetadata {
             path: path.to_path_buf(),
             modified: metadata.modified()?,
             is_directory: metadata.is_dir(),

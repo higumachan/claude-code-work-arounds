@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
-use crate::filesystem::{FileMetadata, FileSystem, FileSystemError, Result};
+use crate::filesystem::{EntryMetadata, FileSystem, FileSystemError, Result};
 
 #[derive(Debug, Clone)]
 struct MockFile {
@@ -51,7 +51,7 @@ impl MockFileSystem {
 }
 
 impl FileSystem for MockFileSystem {
-    fn list_directory(&self, path: &Path) -> Result<Vec<FileMetadata>> {
+    fn list_directory(&self, path: &Path) -> Result<Vec<EntryMetadata>> {
         let files = self.files.lock().unwrap();
         let directories = self.directories.lock().unwrap();
         
@@ -66,7 +66,7 @@ impl FileSystem for MockFileSystem {
         for (file_path, file) in files.iter() {
             if let Some(parent) = file_path.parent() {
                 if parent == path {
-                    results.push(FileMetadata {
+                    results.push(EntryMetadata {
                         path: file_path.clone(),
                         modified: file.modified,
                         is_directory: false,
@@ -79,7 +79,7 @@ impl FileSystem for MockFileSystem {
         for dir_path in directories.iter() {
             if let Some(parent) = dir_path.parent() {
                 if parent == path && dir_path != path {
-                    results.push(FileMetadata {
+                    results.push(EntryMetadata {
                         path: dir_path.clone(),
                         modified: SystemTime::now(),
                         is_directory: true,
@@ -91,18 +91,18 @@ impl FileSystem for MockFileSystem {
         Ok(results)
     }
     
-    fn get_metadata(&self, path: &Path) -> Result<FileMetadata> {
+    fn get_metadata(&self, path: &Path) -> Result<EntryMetadata> {
         let files = self.files.lock().unwrap();
         let directories = self.directories.lock().unwrap();
         
         if let Some(file) = files.get(path) {
-            Ok(FileMetadata {
+            Ok(EntryMetadata {
                 path: path.to_path_buf(),
                 modified: file.modified,
                 is_directory: false,
             })
         } else if directories.contains(&path.to_path_buf()) {
-            Ok(FileMetadata {
+            Ok(EntryMetadata {
                 path: path.to_path_buf(),
                 modified: SystemTime::now(),
                 is_directory: true,

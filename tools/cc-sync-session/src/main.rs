@@ -51,13 +51,16 @@ fn find_repo_dir(start: &Path) -> Option<PathBuf> {
     loop {
         let git_dir = current.join(".git");
         let ccss_dir = current.join(".claude").join("ccss_sessions");
-        
-        log::debug!("Checking directory: {}", current.display());
-        
+
+        log::debug!("Checking directory: {} git: {}, ccss: {}",
+                    current.display(),
+                    git_dir.exists(),
+                    ccss_dir.exists());
+
         if git_dir.exists() && ccss_dir.exists() {
             return Some(current);
         }
-        
+
         if !current.pop() {
             break;
         }
@@ -144,7 +147,7 @@ fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run:
     };
 
     let source_dir = source_root_dir.join(&repo_dir_cc_style);
-    
+
     log::info!("Using source directory: {}", source_dir.display());
 
     
@@ -182,7 +185,7 @@ fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run:
         verbose,
     };
     
-    let result = syncer.sync(&source_dir, &target_dir, &options)
+    let result = syncer.sync(&source_root_dir, repo_dir_cc_style.as_str(), &target_dir, &options)
         .context("Failed to sync sessions")?;
     
     // Print results

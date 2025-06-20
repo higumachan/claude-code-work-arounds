@@ -26,7 +26,7 @@ fn test_sync_new_files() {
     
     // Run sync
     let options = SyncOptions::default();
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify results
     assert_eq!(result.files_copied, 2);
@@ -72,7 +72,7 @@ fn test_sync_skip_up_to_date_files() {
     
     // Run sync
     let options = SyncOptions::default();
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify file was skipped
     assert_eq!(result.files_copied, 0);
@@ -106,7 +106,7 @@ fn test_sync_update_newer_files() {
     
     // Run sync
     let options = SyncOptions::default();
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify file was updated
     assert_eq!(result.files_copied, 1);
@@ -135,7 +135,7 @@ fn test_sync_dry_run() {
         dry_run: true,
         verbose: false,
     };
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify counts but no actual copies
     assert_eq!(result.files_copied, 1);
@@ -164,7 +164,7 @@ fn test_sync_with_github_domain() {
     
     // Run sync
     let options = SyncOptions::default();
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify correct path conversion
     let expected_file = target_dir.join("Users/yuta/github.com/project").join("file.txt");
@@ -198,7 +198,7 @@ fn test_sync_nested_directories() {
     
     // Run sync
     let options = SyncOptions::default();
-    let result = syncer.sync(source_dir, target_dir, &options).unwrap();
+    let result = syncer.sync(source_dir, "-Users-yuta-", target_dir, &options).unwrap();
     
     // Verify all files and directories were created
     assert_eq!(result.files_copied, 4);

@@ -21,16 +21,16 @@ pub enum FileSystemError {
 pub type Result<T> = std::result::Result<T, FileSystemError>;
 
 #[derive(Debug, Clone)]
-pub struct FileMetadata {
+pub struct EntryMetadata {
     pub path: PathBuf,
     pub modified: SystemTime,
     pub is_directory: bool,
 }
 
 pub trait FileSystem: Send + Sync {
-    fn list_directory(&self, path: &Path) -> Result<Vec<FileMetadata>>;
+    fn list_directory(&self, path: &Path) -> Result<Vec<EntryMetadata>>;
     
-    fn get_metadata(&self, path: &Path) -> Result<FileMetadata>;
+    fn get_metadata(&self, path: &Path) -> Result<EntryMetadata>;
     
     fn copy_file(&self, from: &Path, to: &Path) -> Result<()>;
     
