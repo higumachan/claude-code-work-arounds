@@ -1,10 +1,10 @@
 -   id: sync-claude-code-sessions
     name: Sync Claude Code Sessions
     description: Sync Claude Code session files to the repository
-    entry: cc-sync-session sync
+    entry: cc-sync-session sync --git-add
     additional_dependencies: ["cli:cc-sync-session"]
     language: rust 
     pass_filenames: false
     always_run: true
-    stages: [pre-commit]
+    stages: [prepare-commit-msg]
 
