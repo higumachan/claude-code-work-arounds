@@ -1,12 +1,9 @@
 -   id: sync-claude-code-sessions
     name: Sync Claude Code Sessions
     description: Sync Claude Code session files to the repository
-    entry: cargo run --manifest-path tools/cc-sync-session/Cargo.toml -- sync
-    files:
-      - ./tools/cc-sync-session/Cargo.toml
-      - ./tools/cc-sync-session/Cargo.lock
-      - ./tools/cc-sync-session/src
-    language: system
+    entry: cc-sync-session sync
+    additional_dependencies: ["cli:cc-sync-session"]
+    language: rust 
     pass_filenames: false
     always_run: true
     stages: [pre-commit]
