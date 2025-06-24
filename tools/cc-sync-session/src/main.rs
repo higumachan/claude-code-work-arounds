@@ -212,18 +212,20 @@ fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run:
         let repo = Repository::open(&repo_dir)
             .context("Failed to open git repository")?;
         
-        let ccss_sessions_path = Path::new(".claude/ccss_sessions");
+        let ccss_sessions_path = target_dir.strip_prefix(&repo_dir)
+            .unwrap_or(&target_dir);
+        
         let mut index = repo.index()
             .context("Failed to get repository index")?;
         
-        // Add all files under .claude/ccss_sessions
-        index.add_path(ccss_sessions_path)
+        // Add all files under .claude/ccss_sessions recursively
+        index.add_all([ccss_sessions_path], git2::IndexAddOption::DEFAULT, None)
             .context("Failed to add .claude/ccss_sessions to git index")?;
         
         index.write()
             .context("Failed to write git index")?;
         
-        println!("\nAdded .claude/ccss_sessions to git index");
+        println!("\nAdded {} to git index", ccss_sessions_path.display());
     }
     
     if result.files_copied != 0 {
