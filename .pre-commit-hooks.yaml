@@ -1,0 +1,16 @@
+-   id: sync-claude-code-sessions
+    name: Sync Claude Code Sessions
+    description: Sync Claude Code session files to the repository
+    entry: cargo run --manifest-path tools/cc-sync-session/Cargo.toml -- sync
+    language: system
+    pass_filenames: false
+    always_run: true
+    stages: [pre-commit]
+-   id: sync-claude-code-sessions-dry-run
+    name: Sync Claude Code Sessions (Dry Run)
+    description: Preview what session files would be synced (dry run mode)
+    entry: cargo run --manifest-path tools/cc-sync-session/Cargo.toml -- sync --dry-run
+    language: system
+    pass_filenames: false
+    always_run: true
+    stages: [manual]

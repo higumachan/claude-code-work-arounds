@@ -1,0 +1,23 @@
+# Example .pre-commit-config.yaml for using cc-sync-session
+# Copy this file to .pre-commit-config.yaml in your project root
+#
+# Note: This hook requires Rust/Cargo to be installed since it builds
+# and runs the cc-sync-session tool from source
+
+repos:
+  # Sync Claude Code sessions before committing
+  - repo: https://github.com/higumachan/claude-code-work-arounds
+    rev: main  # or specify a tag/commit
+    hooks:
+      - id: sync-claude-code-sessions
+        # The hook will run: cargo run --manifest-path tools/cc-sync-session/Cargo.toml -- sync
+        # Make sure to run `cc-sync-session init` in your repository first
+        
+  # Other hooks can be added here
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files

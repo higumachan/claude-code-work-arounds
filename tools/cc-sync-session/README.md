@@ -137,6 +137,55 @@ Your repository will contain:
 - `CC_SYNC_SESSION_SOURCE_DIR`: Default source directory when `--source-dir` is not specified
 - `RUST_LOG`: Control log level (e.g., `RUST_LOG=info`, `RUST_LOG=debug`). When `-v` is used, defaults to `info`
 
+## Pre-commit Hook Integration
+
+You can use cc-sync-session as a [pre-commit](https://pre-commit.com/) hook to automatically sync Claude Code sessions before each commit.
+
+### Setup
+
+1. Install pre-commit:
+   ```bash
+   pip install pre-commit
+   ```
+
+2. Install cc-sync-session:
+   ```bash
+   cargo install --path /path/to/cc-sync-session
+   ```
+
+3. Create a `.pre-commit-config.yaml` file in your repository:
+   ```yaml
+   repos:
+     - repo: https://github.com/higumachan/claude-code-work-arounds
+       rev: main  # or specify a tag/commit
+       hooks:
+         - id: sync-claude-code-sessions
+   ```
+
+4. Install the pre-commit hook:
+   ```bash
+   pre-commit install
+   ```
+
+5. Initialize your repository for session syncing:
+   ```bash
+   cc-sync-session init
+   ```
+
+Now, every time you commit, cc-sync-session will automatically sync your Claude Code sessions to the repository.
+
+### Available Hooks
+
+- `sync-claude-code-sessions`: Runs sync before each commit
+- `sync-claude-code-sessions-dry-run`: Preview what would be synced (manual stage only)
+
+### Bypassing the Hook
+
+If you need to commit without syncing sessions:
+```bash
+git commit --no-verify
+```
+
 ## Logging
 
 The tool uses the `log` crate with `env_logger` for logging. All logs are written to stderr.
