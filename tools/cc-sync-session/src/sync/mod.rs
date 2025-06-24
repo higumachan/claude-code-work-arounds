@@ -100,9 +100,8 @@ impl<FS: FileSystem> SessionSyncer<FS> {
                     .map_err(|e| FileSystemError::PathError(e.to_string()))?;
                 
                 // Convert directory name format
-                let converted_path = self.convert_directory_name(relative_path)?;
-                log::debug!("Converted path: {}", converted_path.display());
-                let target_path = target_dir.join(&converted_path);
+                log::debug!("relative path: {}", relative_path.display());
+                let target_path = target_dir.join(&relative_path);
                 
                 if entry.is_directory {
                     // Handle directory
@@ -170,41 +169,6 @@ impl<FS: FileSystem> SessionSyncer<FS> {
         
         // Copy if source is newer than target
         Ok(source_metadata.modified > target_metadata.modified)
-    }
-    
-    fn convert_directory_name(&self, path: &Path) -> Result<PathBuf> {
-        let mut result_components = Vec::new();
-        let mut first_component = true;
-        
-        for component in path.components() {
-            if let std::path::Component::Normal(os_str) = component {
-                if let Some(s) = os_str.to_str() {
-                    if first_component && s.starts_with('-') {
-                        // This is a Claude Code style directory, convert it
-                        let without_prefix = s.strip_prefix('-').unwrap();
-                        let converted = without_prefix.replace('-', "/");
-                        // Split the converted path and add as separate components
-                        for part in converted.split('/') {
-                            result_components.push(part.to_string());
-                        }
-                        first_component = false;
-                    } else {
-                        // Regular component, keep as is
-                        result_components.push(s.to_string());
-                    }
-                } else {
-                    return Err(FileSystemError::PathError(
-                        "Invalid UTF-8 in path component".to_string()
-                    ));
-                }
-            } else {
-                return Err(FileSystemError::PathError(
-                    "Unexpected path component type".to_string()
-                ));
-            }
-        }
-        
-        Ok(result_components.iter().collect())
     }
 }
 
