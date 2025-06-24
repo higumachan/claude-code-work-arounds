@@ -202,6 +202,11 @@ fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run:
         }
     }
     
+    if result.files_copied != 0 {
+        // コピーが行われた場合は、コマンドとしては失敗とする(pre-commitフックなどでの使用を想定)
+        std::process::exit(-1);
+    }
+
     Ok(())
 }
 
