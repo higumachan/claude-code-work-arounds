@@ -4,6 +4,7 @@ use clap::{Parser, Subcommand};
 use cc_sync_session::{RealFileSystem, SessionSyncer, SyncOptions};
 use log::warn;
 use cc_sync_session::file_path_converter::dir_path_to_claude_code_stype;
+use git2::Repository;
 
 #[derive(Parser, Debug)]
 #[command(name = "cc-sync-session")]
@@ -41,6 +42,10 @@ enum Commands {
         /// Run in dry-run mode (show what would be done without making changes)
         #[arg(short, long)]
         dry_run: bool,
+        
+        /// Add .claude/ccss_sessions to git after sync
+        #[arg(long)]
+        git_add: bool,
     },
 }
 
@@ -115,7 +120,7 @@ fn init_command(repo_dir: Option<PathBuf>) -> Result<()> {
     Ok(())
 }
 
-fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run: bool, verbose: bool) -> Result<()> {
+fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run: bool, git_add: bool, verbose: bool) -> Result<()> {
     // Determine repository directory
     let repo_dir = match repo_dir {
         Some(dir) => dir,
@@ -202,6 +207,25 @@ fn sync_command(source_dir: Option<PathBuf>, repo_dir: Option<PathBuf>, dry_run:
         }
     }
     
+    // Perform git add if requested and not in dry-run mode
+    if git_add && !dry_run && result.files_copied > 0 {
+        let repo = Repository::open(&repo_dir)
+            .context("Failed to open git repository")?;
+        
+        let ccss_sessions_path = Path::new(".claude/ccss_sessions");
+        let mut index = repo.index()
+            .context("Failed to get repository index")?;
+        
+        // Add all files under .claude/ccss_sessions
+        index.add_path(ccss_sessions_path)
+            .context("Failed to add .claude/ccss_sessions to git index")?;
+        
+        index.write()
+            .context("Failed to write git index")?;
+        
+        println!("\nAdded .claude/ccss_sessions to git index");
+    }
+    
     if result.files_copied != 0 {
         // コピーが行われた場合は、コマンドとしては失敗とする(pre-commitフックなどでの使用を想定)
         std::process::exit(-1);
@@ -226,8 +250,8 @@ fn main() -> Result<()> {
     
     match cli.command {
         Commands::Init { repo_dir } => init_command(repo_dir),
-        Commands::Sync { source_dir, repo_dir, dry_run } => {
-            sync_command(source_dir, repo_dir, dry_run, cli.verbose)
+        Commands::Sync { source_dir, repo_dir, dry_run, git_add } => {
+            sync_command(source_dir, repo_dir, dry_run, git_add, cli.verbose)
         }
     }
 }
