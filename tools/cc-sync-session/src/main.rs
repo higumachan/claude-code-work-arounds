@@ -5,6 +5,8 @@ use cc_sync_session::{RealFileSystem, SessionSyncer, SyncOptions};
 use log::warn;
 use cc_sync_session::file_path_converter::dir_path_to_claude_code_stype;
 use git2::Repository;
+use std::fs;
+use std::io::{Read, Write};
 
 #[derive(Parser, Debug)]
 #[command(name = "cc-sync-session")]
@@ -113,6 +115,46 @@ fn init_command(repo_dir: Option<PathBuf>) -> Result<()> {
     let gitkeep_path = ccss_dir.join(".gitkeep");
     std::fs::write(&gitkeep_path, "")
         .context("Failed to create .gitkeep file")?;
+    
+    // Handle .gitattributes for Git LFS
+    let gitattributes_path = repo_dir.join(".gitattributes");
+    let lfs_line = ".claude/ccss_sessions/** filter=lfs diff=lfs merge=lfs -text";
+    
+    // Check if .gitattributes exists and read its content
+    let mut content = String::new();
+    let mut needs_newline = false;
+    
+    if gitattributes_path.exists() {
+        let mut file = fs::File::open(&gitattributes_path)
+            .context("Failed to open .gitattributes file")?;
+        file.read_to_string(&mut content)
+            .context("Failed to read .gitattributes file")?;
+        
+        // Check if LFS line already exists
+        if content.lines().any(|line| line.trim() == lfs_line) {
+            println!("Git LFS configuration already exists in .gitattributes");
+        } else {
+            // Check if we need a newline before appending
+            needs_newline = !content.is_empty() && !content.ends_with('\n');
+        }
+    }
+    
+    // Add LFS line if it doesn't exist
+    if !gitattributes_path.exists() || !content.lines().any(|line| line.trim() == lfs_line) {
+        let mut file = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&gitattributes_path)
+            .context("Failed to open .gitattributes file for writing")?;
+        
+        if needs_newline {
+            writeln!(file)?;
+        }
+        writeln!(file, "{}", lfs_line)
+            .context("Failed to write to .gitattributes file")?;
+        
+        println!("Added Git LFS configuration to .gitattributes");
+    }
     
     println!("Initialized session sync directory at: {}", ccss_dir.display());
     println!("Created: {}", gitkeep_path.display());
