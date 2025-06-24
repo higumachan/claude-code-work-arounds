@@ -1,0 +1,2 @@
+.claude/ccss_sessions/ filter=lfs diff=lfs merge=lfs -text
+.claude/ccss_sessions/** filter=lfs diff=lfs merge=lfs -text
