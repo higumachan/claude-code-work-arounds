@@ -6,5 +6,5 @@
     language: rust 
     pass_filenames: false
     always_run: true
-    stages: [prepare-commit-msg]
+    stages: [pre-commit]
 
